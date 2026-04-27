@@ -6,11 +6,22 @@ const User = require('./models/User');
 const seed = async () => {
   await connectDB();
 
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const adminName = process.env.ADMIN_NAME || 'Admin User';
+
+  if (!adminEmail || !adminPassword) {
+    console.error(
+      'ADMIN_EMAIL and ADMIN_PASSWORD must be defined in .env to seed the admin account.'
+    );
+    process.exit(1);
+  }
+
   const users = [
     {
-      name: 'Admin User',
-      email: 'admin@eduportal.com',
-      password: 'admin123',
+      name: adminName,
+      email: adminEmail,
+      password: adminPassword,
       role: 'admin',
     },
     {
@@ -28,7 +39,7 @@ const seed = async () => {
   ];
 
   for (const u of users) {
-    const exists = await User.findOne({ email: u.email });
+    const exists = await User.findOne({ email: u.email.toLowerCase() });
     if (exists) {
       console.log(`Skipping existing user: ${u.email}`);
       continue;
